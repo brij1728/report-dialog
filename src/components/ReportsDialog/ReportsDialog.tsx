@@ -1,34 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Paginator } from "../Paginator";
 import { Report } from "@/types";
 import { dummyReports } from "@/data";
 
-const itemsPerPage = 60;
-
 export const ReportsDialog: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const totalItems = dummyReports.length;
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const [currentReports, setCurrentReports] = useState<Report[]>([]);
+
+  useEffect(() => {
+    const indexOfLastReport = currentPage * itemsPerPage;
+    const indexOfFirstReport = indexOfLastReport - itemsPerPage;
+    setCurrentReports(
+      dummyReports.slice(indexOfFirstReport, indexOfLastReport)
+    );
+  }, [currentPage, itemsPerPage]);
 
   const onPageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
-  const onItemsPerPageChange = (itemsPerPage: number) => {
-    setItemsPerPage(itemsPerPage);
-    setCurrentPage(1); // Reset to first page whenever the items per page changes
+  const onItemsPerPageChange = (numItems: number) => {
+    setItemsPerPage(numItems);
+    setCurrentPage(1);
   };
 
-  // Calculate the current reports to display
-  const indexOfLastReport = currentPage * itemsPerPage;
-  const indexOfFirstReport = indexOfLastReport - itemsPerPage;
-  const currentReports = dummyReports.slice(
-    indexOfFirstReport,
-    indexOfLastReport
-  );
   return (
     <div className="absolute inset-0 bg-gray-500 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-start pt-10">
       <div className="relative bg-white w-full max-w-2xl mx-4 md:mx-0 border border-gray-300 shadow-lg rounded-lg">
@@ -38,11 +37,9 @@ export const ReportsDialog: React.FC = () => {
           </h3>
           <div className="flex items-center">
             <button className="p-2 rounded-full hover:bg-gray-100 focus:outline-none">
-              {/* Here, you would use an actual filter icon */}
               <span className="text-gray-600">Filter</span>
             </button>
             <button className="ml-2 p-2 rounded-full hover:bg-gray-100 focus:outline-none">
-              {/* Here, you would use an actual close icon */}
               <span className="text-gray-600">X</span>
             </button>
           </div>
@@ -76,7 +73,6 @@ export const ReportsDialog: React.FC = () => {
                       href="#"
                       className="text-indigo-600 hover:text-indigo-900"
                     >
-                      {/* Here, you would use an actual download icon */}
                       Download
                     </a>
                   </td>
@@ -87,7 +83,7 @@ export const ReportsDialog: React.FC = () => {
           <Paginator
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-            totalItems={totalItems}
+            totalItems={dummyReports.length}
             onPageChange={onPageChange}
             onItemsPerPageChange={onItemsPerPageChange}
           />

@@ -1,8 +1,4 @@
-export type Report = {
-  id: number;
-  date: string;
-  name: string;
-};
+import { Report } from "../types";
 
 export const dummyReports: Report[] = [
   { id: 1, date: "2024-04-01", name: "Report_A_01-04-2024.csv" },
