@@ -19,40 +19,42 @@ export const Paginator: React.FC<PaginatorProps> = ({
 }) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      onPageChange(page);
-    }
+  const range = (start: number, end: number): number[] => {
+    return Array.from({ length: end - start + 1 }, (_, i) => i + start);
   };
 
   let pages: (number | string)[] = [];
-  for (let p = 1; p <= totalPages; p++) {
-    if (
-      p === 1 ||
-      p === totalPages ||
-      (p >= currentPage - 1 && p <= currentPage + 1)
-    ) {
-      pages.push(p);
-    } else if (
-      (p === currentPage - 2 || p === currentPage + 2) &&
-      totalPages > 7
-    ) {
+  const sidePages = range(1, totalPages).filter(
+    (page) =>
+      page === 1 ||
+      page === totalPages ||
+      (page >= currentPage - 2 && page <= currentPage + 2)
+  );
+
+  sidePages.forEach((page, index, array) => {
+    if (page - (array[index - 1] || 0) > 1) {
       pages.push("...");
-      if (p === currentPage - 2) p = totalPages - 3;
     }
-  }
+    pages.push(page);
+    if ((array[index + 1] || totalPages + 1) - page > 1) {
+      pages.push("...");
+    }
+  });
+
+  const handlePageChange = (page: number) => {
+    onPageChange(page);
+  };
 
   return (
-    <div className="flex items-center justify-center space-x-2 w-full my-4">
+    <div className="flex items-center justify-between space-x-1 w-full my-4">
       <button
+        disabled={currentPage === 1}
+        onClick={() => handlePageChange(currentPage - 1)}
         className={`h-10 px-3 border rounded-md flex items-center justify-center ${
           currentPage === 1
-            ? "bg-gray-300 cursor-not-allowed text-gray-500"
+            ? "cursor-not-allowed text-gray-500 bg-gray-300"
             : "hover:bg-gray-100"
         }`}
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        aria-label="Previous Page"
       >
         <GrPrevious className="text-lg" />
       </button>
@@ -60,7 +62,7 @@ export const Paginator: React.FC<PaginatorProps> = ({
       {pages.map((page, index) =>
         typeof page === "number" ? (
           <button
-            key={page}
+            key={index}
             className={`w-10 h-10 border rounded-md flex items-center justify-center ${
               currentPage === page
                 ? "bg-red-500 text-white"
@@ -81,14 +83,13 @@ export const Paginator: React.FC<PaginatorProps> = ({
       )}
 
       <button
+        disabled={currentPage === totalPages}
+        onClick={() => handlePageChange(currentPage + 1)}
         className={`h-10 px-3 border rounded-md flex items-center justify-center ${
           currentPage === totalPages
-            ? "bg-gray-300 cursor-not-allowed text-gray-500"
+            ? "cursor-not-allowed text-gray-500 bg-gray-300"
             : "hover:bg-gray-100"
         }`}
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        aria-label="Next Page"
       >
         <GrNext className="text-lg" />
       </button>
@@ -103,9 +104,9 @@ export const Paginator: React.FC<PaginatorProps> = ({
           className="w-16 pl-2 border rounded-md text-center"
           value={itemsPerPage}
           onChange={(e) => {
-            const num = parseInt(e.target.value, 10);
-            if (!isNaN(num) && num > 0) {
-              onItemsPerPageChange(num);
+            const numValue = parseInt(e.target.value, 10);
+            if (!isNaN(numValue) && numValue > 0) {
+              onItemsPerPageChange(numValue);
             }
           }}
           min="1"
